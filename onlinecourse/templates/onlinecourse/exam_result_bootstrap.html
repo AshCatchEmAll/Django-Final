@@ -51,5 +51,42 @@
             <!--HINT Display exam results-->
         </div>
     </div>
+
+    <div class="container">
+        <h1>Exam Result</h1>
+        <hr>
+        <h3>Result: {{ context.result }}</h3>
+        <h3>Total Score: {{ context.total_score }}</h3>
+        <h3>Score per Question:</h3>
+        <ul>
+            {% for score in context.score_per_question %}
+            <li>{{ score }}</li>
+            {% endfor %}
+        </ul>
+        <h3>Result per Question:</h3>
+        <ul>
+            {% for result in context.result_per_question %}
+            <li>{{ result }}</li>
+            {% endfor %}
+        </ul>
+        <h3>Correct Answers:</h3>
+        <ul>
+            {% for answer in context.correct_answers %}
+            <li>{{ answer }}</li>
+            {% endfor %}
+        </ul>
+        <h3>Incorrect Answers:</h3>
+        <ul>
+            {% for answer in context.incorrect_answers %}
+            <li>{{ answer }}</li>
+            {% endfor %}
+        </ul>
+        <h3>Unanswered Questions:</h3>
+        <ul>
+            {% for answer in context.unanswered_questions %}
+            <li>{{ answer }}</li>
+            {% endfor %}
+        </ul>
+    </div>
 </body>
 </html>

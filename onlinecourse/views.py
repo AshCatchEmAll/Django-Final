@@ -8,9 +8,56 @@ from django.urls import reverse
 from django.views import generic
 from django.contrib.auth import login, logout, authenticate
 import logging
+from .models import Course, Enrollment, Question, Choice, Submission
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 # Create your views here.
+
+def show_exam_result(request, course_id, submission_id):
+    context = {}
+    course = get_object_or_404(Course, pk=course_id)
+    submission = get_object_or_404(Submission, pk=submission_id)
+    user = request.user
+    enrollment = Enrollment.objects.get(user=user, course=course)
+    context['course'] = course
+    context['submission'] = submission
+    context['enrollment'] = enrollment
+    context['grade'] = 0
+    context['total'] = 0
+    context['correct'] = 0
+    context['incorrect'] = 0
+    context['unanswered'] = 0
+    context['questions'] = []
+    for question in course.question_set.all():
+        context['total'] += 1
+        if question.is_get_score(submission.choices.all()):
+            context['correct'] += 1
+            context['grade'] += question.grade
+        else:
+            context['incorrect'] += 1
+        if question.is_answered(submission.choices.all()):
+            context['questions'].append([question, True])
+        else:
+            context['questions'].append([question, False])
+    context['unanswered'] = context['total'] - context['correct'] - context['incorrect']
+    return render(request, 'onlinecourse/templates/exam_result_bootstrap.html', context)
+        
+
+def submit(request,course_id):
+    course = get_object_or_404(Course, pk=course_id)
+    user = request.user
+    enrollment = Enrollment.objects.get(user=user, course=course)
+    submission = Submission.objects.create(enrollment=enrollment)
+    submitted_answers = []
+    for key in request.POST:
+        if key.startswith('choice'):
+            value = request.POST[key]
+            choice_id = int(value)
+            submitted_answers.append(choice_id)
+            choice = Choice.objects.get(id=choice_id)
+            submission.choices.add(choice)
+    submission.save()
+    return HttpResponseRedirect(reverse(viewname='onlinecourse:show_exam_result', args=(course.id, submission.id,)))
 
 
 def registration_request(request):

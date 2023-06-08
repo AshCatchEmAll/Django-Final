@@ -9,6 +9,32 @@ except Exception:
 from django.conf import settings
 import uuid
 
+class Submission(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    enrollment = models.ForeignKey('Enrollment', on_delete=models.CASCADE)
+    choices = models.ManyToManyField('Choice')
+
+    def __str__(self):
+        return self.enrollment.user.username + "," + \
+               self.enrollment.course.name
+               
+class Choice(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    choice_text = models.CharField(max_length=200)
+    is_correct = models.BooleanField(default=False)
+    question = models.ForeignKey('Question', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.choice_text
+
+class Question(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    question_text = models.CharField(max_length=200)
+    question_grade = models.IntegerField(default=0)
+    course = models.ForeignKey('Course', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.question_text
 
 # Instructor model
 class Instructor(models.Model):
